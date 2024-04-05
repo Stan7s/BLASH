@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GPT_API_KEY } from '../../../screts.api.js';
+import { GPT_API_KEY } from '../../../secrets.api.js';
 
 console.log(GPT_API_KEY); // Use your API key securely
 
