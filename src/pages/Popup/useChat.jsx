@@ -20,7 +20,7 @@ const sendMessageToBackend = async (userMessage) => {
             max_tokens: 1000,
           });
         console.log("Response from GPT-3.5:", response.choices[0].message.content)
-        return { message: response.choices[0].message.content};
+        return { message: response.choices[0].message.content + "!!!!"};
     } catch (error) {
         console.error("Error sending message to GPT-3.5:", error);
         return { message: "Error processing your request. Please try again." + error };
