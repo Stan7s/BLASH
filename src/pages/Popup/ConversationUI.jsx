@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useChat } from './useChat';
+import { fetchPostSummary } from './useChat';
 
-let summaryDummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam";
+const dummyPostText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam";
 
 const styles = {
   conversationUI: {
@@ -59,12 +60,24 @@ const styles = {
     color: 'white',
     cursor: 'pointer',
   },
+  summaryButton: {
+    fontSize: '9px',
+    marginLeft: '3px',
+    marginTop: '3px',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    border: 'none',
+    backgroundColor: '#00559a',
+    color: 'white',
+    cursor: 'pointer',
+  },
   summaryText: {
     borderRadius: '5px',
     backgroundColor: '#ccd0fb',
     padding: '10px',
   },
 };
+
 
 const ConversationUI = () => {
   const { messages, sendMessage } = useChat();
@@ -77,11 +90,32 @@ const ConversationUI = () => {
     setInputText('');
   };
 
+  const loadSummary = (postText) => {
+    const [summary, setSummary] = useState("Loading Summary!");
+
+    fetchPostSummary(postText).then(function (response) {
+      setSummary(response.message);
+    });
+
+    return summary;
+  };
+
   return (
     <div style={styles.conversationUI}>
       {/* Summary of the post */}
       <div style={styles.summaryText}>
-        {summaryDummyText}
+        <b>Summary of the post:</b>
+        <br></br>
+        {loadSummary(dummyPostText)}
+      </div>
+      <div>
+        Do you think the summary is correct?
+        <button style={styles.summaryButton}>
+          Yes
+        </button>
+        <button style={styles.summaryButton}>
+          No
+        </button>
       </div>
 
       {/* Chat with AI */}
