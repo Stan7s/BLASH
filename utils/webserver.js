@@ -24,10 +24,13 @@ for (var entryName in config.entry) {
 delete config.chromeExtensionBoilerplate;
 
 var compiler = webpack(config);
-
+const fs = require('fs');
 var server = new WebpackDevServer(
   {
-    https: false,
+    https: {
+      key: fs.readFileSync(path.join(__dirname, 'key.pem')),  // Path to your key
+      cert: fs.readFileSync(path.join(__dirname, 'cert.pem')), // Path to your cert
+    },
     hot: true,
     liveReload: false,
     client: {
