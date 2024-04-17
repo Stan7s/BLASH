@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useChat } from './useChat';
 import highlight_sample from './highlight_sample.json'
 const colors = ["red", "yellow", "blue", "green", "purple", "orange"];
@@ -58,6 +58,59 @@ const styles = {
     color: 'white',
     cursor: 'pointer',
   },
+  // New styles for the toggle switch container
+  toggleSwitchContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'absolute', // Position it absolutely within the parent
+    top: '10px', // At the top of the parent container
+    right: '10px', // At the right of the parent container
+    padding: '5px', // Smaller padding to mak
+  },
+  // Add to your existing styles object
+  toggleSwitch: {
+    position: 'relative',
+    display: 'inline-block',
+    width: '40px',
+    height: '20px',
+    margin: '0', // Adjust as needed
+  },
+  toggleSwitchCheckbox: {
+    opacity: 0,
+    width: 0,
+    height: 0,
+  },
+  toggleTextLabel: {
+    marginRight: '10px', // Space between the text label and the toggle
+    fontSize: '12px', // Adjust text size as needed
+  },
+  toggleSwitchLabel: {
+    position: 'absolute',
+    cursor: 'pointer',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#ccc',
+    transition: '.4s',
+    borderRadius: '20px',
+  },
+  toggleSwitchInner: {
+    // Inner styles if needed
+  },
+  toggleSwitchSlider: {
+    position: 'absolute',
+    content: '""',
+    height: '18px',
+    width: '18px',
+    left: '4px',
+    bottom: '1px',
+    backgroundColor: '#fff',
+    transition: '.4s',
+    borderRadius: '50%',
+  },
+
 };
 
 // const ConversationUI = () => {
@@ -125,15 +178,31 @@ const styles = {
 const ConversationUI = () => {
   const { messages, sendMessage } = useChat();
   const [inputText, setInputText] = useState('');
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const toggleSwitchLabelStyle = {
+    position: 'absolute',
+    cursor: 'pointer',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: isHighlighted ? '#4CAF50' : '#ccc', // Green when on
+    transition: '.4s',
+    borderRadius: '34px',
+  };
 
-  const handleInput = (e) => {
-    e.preventDefault();
-    const trimmedInput = inputText.trim();
-    if (!trimmedInput) return;
-
-    // Check if the inputText starts with the "highlight:" command
-
-    if (trimmedInput.toLowerCase().startsWith('highlight')) {
+  const toggleSwitchSliderStyle = {
+    position: 'absolute',
+    top: '4px',
+    left: isHighlighted ? '25px' : '4px', // Move right when on
+    width: '13px',
+    height: '13px',
+    backgroundColor: '#fff',
+    borderRadius: '50%',
+    transition: '.4s',
+  };
+  const handleHighlightToggle = () => {
+    if (!isHighlighted) {
       // Extract the text to highlight after the "highlight:" command
       // const textToHighlight = trimmedInput.substring('highlight:'.length).trim();
 
@@ -161,7 +230,7 @@ const ConversationUI = () => {
         });
       }
     }
-    else if (trimmedInput.toLowerCase().startsWith('remove highlight')) {
+    else {
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         console.log(tabs[0].id);
 
@@ -172,12 +241,35 @@ const ConversationUI = () => {
         });
       });
     }
-    else {
-      // It's not a highlight command, so treat it as a regular chat message
+    // Add your logic to handle highlight toggling
+    setIsHighlighted(!isHighlighted);
+    console.log('Toggle Highlight State:', !isHighlighted); // Add this
+  };
+
+  const handleInput = (e) => {
+    e.preventDefault();
+    const trimmedInput = inputText.trim();
+    if (!trimmedInput) return;
+
+    if (trimmedInput) {
       sendMessage(trimmedInput);
+      setInputText(''); // Clear the input after handling the command or sending the message
     }
 
-    setInputText(''); // Clear the input after handling the command or sending the message
+    // // Check if the inputText starts with the "highlight:" command
+    // // Effect to handle highlighting based on the toggle state
+    // useEffect(() => {
+    //   // Replace 'highlight_sample' and 'colors' with your actual logic to highlight text
+    //   if (highlightEnabled && highlight_sample) {
+    //     console.log("Highlighting is enabled");
+
+    //     // Your existing highlight logic...
+    //   } else {
+    //     console.log("Highlighting is disabled");
+    //     // Your existing remove highlight logic...
+    //   }
+    // }, [highlightEnabled]); // Depend on the highlightEnabled state
+    // Define styles that depend on state directly within your component
   };
 
   return (
@@ -205,6 +297,27 @@ const ConversationUI = () => {
         />
         <button type="submit" style={styles.sendButton}>Send</button>
       </form>
+      <div style={styles.toggleSwitchContainer}>
+        <label style={styles.toggleTextLabel}>Highlighting</label>
+        <div style={styles.toggleSwitch}>
+          <input
+            id="highlight-toggle"
+            style={styles.toggleSwitchCheckbox}
+            className="toggle-switch-checkbox" // use className for CSS styles if needed
+            type="checkbox"
+            checked={isHighlighted}
+            onChange={handleHighlightToggle}
+          />
+          <label
+            style={toggleSwitchLabelStyle}
+            htmlFor="highlight-toggle"
+          >
+            <span style={toggleSwitchSliderStyle}></span>
+            {/* <span style={styles.toggleSwitchInner} /> */}
+            {/* <span style={styles.toggleSwitchSlider} /> */}
+          </label>
+        </div>
+      </div>
     </div>
   );
 };
