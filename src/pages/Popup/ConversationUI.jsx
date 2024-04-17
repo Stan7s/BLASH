@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useChat } from './useChat';
 import { fetchPostSummary } from './useChat';
 import { getData } from './getData';
 
 // const dummyPostText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam";
-
+import highlight_sample from './highlight_sample.json'
+const colors = ["red", "yellow", "blue", "green", "purple", "orange"];
 const styles = {
   conversationUI: {
     padding: '10px',
@@ -77,13 +78,131 @@ const styles = {
     backgroundColor: '#ccd0fb',
     padding: '10px',
   },
+  // New styles for the toggle switch container
+  toggleSwitchContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    position: 'absolute', // Position it absolutely within the parent
+    top: '10px', // At the top of the parent container
+    right: '10px', // At the right of the parent container
+    padding: '5px', // Smaller padding to mak
+  },
+  // Add to your existing styles object
+  toggleSwitch: {
+    position: 'relative',
+    display: 'inline-block',
+    width: '40px',
+    height: '20px',
+    margin: '0', // Adjust as needed
+  },
+  toggleSwitchCheckbox: {
+    opacity: 0,
+    width: 0,
+    height: 0,
+  },
+  toggleTextLabel: {
+    marginRight: '10px', // Space between the text label and the toggle
+    fontSize: '12px', // Adjust text size as needed
+  },
+  toggleSwitchLabel: {
+    position: 'absolute',
+    cursor: 'pointer',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#ccc',
+    transition: '.4s',
+    borderRadius: '20px',
+  },
+  toggleSwitchInner: {
+    // Inner styles if needed
+  },
+  toggleSwitchSlider: {
+    position: 'absolute',
+    content: '""',
+    height: '18px',
+    width: '18px',
+    left: '4px',
+    bottom: '1px',
+    backgroundColor: '#fff',
+    transition: '.4s',
+    borderRadius: '50%',
+  },
 };
 
 const ConversationUI = () => {
   const { messages, sendMessage } = useChat();
   const [inputText, setInputText] = useState('');
   const { postData, textData } = getData();
+  const [isHighlighted, setIsHighlighted] = useState(false);
+  const toggleSwitchLabelStyle = {
+    position: 'absolute',
+    cursor: 'pointer',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: isHighlighted ? '#4CAF50' : '#ccc', // Green when on
+    transition: '.4s',
+    borderRadius: '34px',
+  };
 
+  const toggleSwitchSliderStyle = {
+    position: 'absolute',
+    top: '4px',
+    left: isHighlighted ? '25px' : '4px', // Move right when on
+    width: '13px',
+    height: '13px',
+    backgroundColor: '#fff',
+    borderRadius: '50%',
+    transition: '.4s',
+  };
+  const handleHighlightToggle = () => {
+    if (!isHighlighted) {
+      // Extract the text to highlight after the "highlight:" command
+      // const textToHighlight = trimmedInput.substring('highlight:'.length).trim();
+
+      if (highlight_sample) {
+        console.log("Text received", highlight_sample);
+
+        // Iterate over each key in the highlight_sample object
+        Object.keys(highlight_sample).forEach((topic, index) => {
+          // Get the array of spans for the current topic
+          const spans = highlight_sample[topic];
+          const color = colors[index % colors.length]
+          // Loop through each span in the current topic's array
+          spans.forEach(span => {
+            // Query the active tab in the current window
+            chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+              console.log(tabs[0].id);
+
+              // Send the individual span to the content script
+              chrome.tabs.sendMessage(tabs[0].id, { action: 'highlight', text: span, color: color }, function (response) {
+                console.log("Highlighting span:", span);
+                console.log(response);
+              });
+            });
+          });
+        });
+      }
+    }
+    else {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        console.log(tabs[0].id);
+
+        // Send the individual span to the content script
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'removehighlight' }, function (response) {
+          console.log(response);
+          console.log("remove highlight")
+        });
+      });
+    }
+    // Add your logic to handle highlight toggling
+    setIsHighlighted(!isHighlighted);
+    console.log('Toggle Highlight State:', !isHighlighted); // Add this
+  };
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
@@ -143,6 +262,27 @@ const ConversationUI = () => {
           Send
         </button>
       </form>
+      <div style={styles.toggleSwitchContainer}>
+        <label style={styles.toggleTextLabel}>Highlighting</label>
+        <div style={styles.toggleSwitch}>
+          <input
+            id="highlight-toggle"
+            style={styles.toggleSwitchCheckbox}
+            className="toggle-switch-checkbox" // use className for CSS styles if needed
+            type="checkbox"
+            checked={isHighlighted}
+            onChange={handleHighlightToggle}
+          />
+          <label
+            style={toggleSwitchLabelStyle}
+            htmlFor="highlight-toggle"
+          >
+            <span style={toggleSwitchSliderStyle}></span>
+            {/* <span style={styles.toggleSwitchInner} /> */}
+            {/* <span style={styles.toggleSwitchSlider} /> */}
+          </label>
+        </div>
+      </div>
     </div>
   );
 };
