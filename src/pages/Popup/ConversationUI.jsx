@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useChat } from './useChat';
+import { fetchPostSummary } from './useChat';
+import { getData } from './getData';
+
+// const dummyPostText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam";
 import highlight_sample from './highlight_sample.json'
 const colors = ["red", "yellow", "blue", "green", "purple", "orange"];
 const styles = {
@@ -58,6 +62,22 @@ const styles = {
     color: 'white',
     cursor: 'pointer',
   },
+  summaryButton: {
+    fontSize: '9px',
+    marginLeft: '3px',
+    marginTop: '3px',
+    padding: '5px 10px',
+    borderRadius: '5px',
+    border: 'none',
+    backgroundColor: '#00559a',
+    color: 'white',
+    cursor: 'pointer',
+  },
+  summaryText: {
+    borderRadius: '5px',
+    backgroundColor: '#ccd0fb',
+    padding: '10px',
+  },
   // New styles for the toggle switch container
   toggleSwitchContainer: {
     display: 'flex',
@@ -110,74 +130,12 @@ const styles = {
     transition: '.4s',
     borderRadius: '50%',
   },
-
 };
-
-// const ConversationUI = () => {
-//   const { messages, sendMessage } = useChat();
-//   console.log(messages)
-//   const [inputText, setInputText] = useState('');
-//   console.log(inputText)
-//   const [highlightInput, setHighlightInput] = useState('');
-//   console.log(highlightInput)
-
-//   const handleSendMessage = (e) => {
-//     e.preventDefault();
-//     if (!inputText.trim()) return;
-//     sendMessage(inputText);
-//     console.log("nice")
-//     setInputText('');
-//   };
-//   // Handler for highlight functionality
-//   const handleHighlightText = (e) => {
-//     e.preventDefault();
-//     if (!highlightInput.trim()) return;
-//     console.log("none")
-
-//     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-//       chrome.tabs.sendMessage(tabs[0].id, { action: 'highlight', text: highlightInput }, (response) => {
-//         console.log(response);
-//       });
-//     });
-
-//     setHighlightInput(''); // Clear the highlight input after sending the text
-//   };
-
-//   return (
-//     <div style={styles.conversationUI}>
-// <div style={styles.messages}>
-//   {messages.map((msg, index) => (
-//     <div
-//       key={index}
-//       style={{
-//         ...styles.message,
-//         ...(msg.sender === 'user' ? styles.userMessage : styles.botMessage)
-//       }}
-//     >
-//       {msg.text}
-//     </div>
-//   ))}
-// </div>
-
-//       <form onSubmit={handleSendMessage} style={styles.inputArea}>
-//         <input
-//           type="text"
-//           value={inputText}
-//           onChange={(e) => setInputText(e.target.value)}
-//           placeholder="Type a message..."
-//           style={styles.input}
-//         />
-//         <button type="submit" style={styles.sendButton}>Send</button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default ConversationUI
 
 const ConversationUI = () => {
   const { messages, sendMessage } = useChat();
   const [inputText, setInputText] = useState('');
+  const { postData, textData } = getData();
   const [isHighlighted, setIsHighlighted] = useState(false);
   const toggleSwitchLabelStyle = {
     position: 'absolute',
@@ -245,57 +203,64 @@ const ConversationUI = () => {
     setIsHighlighted(!isHighlighted);
     console.log('Toggle Highlight State:', !isHighlighted); // Add this
   };
-
-  const handleInput = (e) => {
+  const handleSendMessage = (e) => {
     e.preventDefault();
-    const trimmedInput = inputText.trim();
-    if (!trimmedInput) return;
+    if (!inputText.trim()) return;
+    sendMessage(inputText);
+    setInputText('');
+  };
 
-    if (trimmedInput) {
-      sendMessage(trimmedInput);
-      setInputText(''); // Clear the input after handling the command or sending the message
-    }
+  const loadSummary = (postText) => {
+    const [summary, setSummary] = useState('Loading Summary!');
 
-    // // Check if the inputText starts with the "highlight:" command
-    // // Effect to handle highlighting based on the toggle state
-    // useEffect(() => {
-    //   // Replace 'highlight_sample' and 'colors' with your actual logic to highlight text
-    //   if (highlightEnabled && highlight_sample) {
-    //     console.log("Highlighting is enabled");
+    fetchPostSummary(postText).then(function (response) {
+      setSummary(response.message);
+    });
 
-    //     // Your existing highlight logic...
-    //   } else {
-    //     console.log("Highlighting is disabled");
-    //     // Your existing remove highlight logic...
-    //   }
-    // }, [highlightEnabled]); // Depend on the highlightEnabled state
-    // Define styles that depend on state directly within your component
+    return summary;
   };
 
   return (
     <div style={styles.conversationUI}>
+      {/* Summary of the post */}
+      <div style={styles.summaryText}>
+        <b>Summary of the post:</b>
+        <br></br>
+        {loadSummary(postData)}
+      </div>
+      <div>
+        Do you think the summary is correct?
+        <button style={styles.summaryButton}>Yes</button>
+        <button style={styles.summaryButton}>No</button>
+      </div>
+
+      {/* Chat with AI */}
       <div style={styles.messages}>
         {messages.map((msg, index) => (
           <div
             key={index}
             style={{
               ...styles.message,
-              ...(msg.sender === 'user' ? styles.userMessage : styles.botMessage)
+              ...(msg.sender === 'user'
+                ? styles.userMessage
+                : styles.botMessage),
             }}
           >
             {msg.text}
           </div>
         ))}
       </div>
-      <form onSubmit={handleInput} style={styles.inputArea}>
+      <form onSubmit={handleSendMessage} style={styles.inputArea}>
         <input
           type="text"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="Type 'highlight:{text}' to highlight or enter a message..."
+          placeholder="Type a message..."
           style={styles.input}
         />
-        <button type="submit" style={styles.sendButton}>Send</button>
+        <button type="submit" style={styles.sendButton}>
+          Send
+        </button>
       </form>
       <div style={styles.toggleSwitchContainer}>
         <label style={styles.toggleTextLabel}>Highlighting</label>
