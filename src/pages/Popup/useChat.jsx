@@ -28,6 +28,30 @@ export const fetchPostSummary = async (postText) => {
     }
 }
 
+export const fetchDraft = async (postText, discussionPoints) => {
+    let instruction = "Pretend to be an assistant who helps users to draft responses for mental health posts on social media community. So the user would be someone that will help the posters (who post about their issues) by providing empathetic responses. The response should not be long. The AI assistant will have some features including highlighting important parts about the posts, For each feature, they can interact more with the assistant to come with different 'draft responses'. If user satisfy with recommended responses, they will choose to add the response to 'Draft Bucket List'. The goal of AI assistant is to utilize these information in draft bucket list to draft the full response to the post. Please give the draft full response to the post"
+    
+    let post = "Post:" + postText;
+    let draft_bucketlist = "Draft bucket list:" + discussionPoints;
+    let prompt = instruction + "\n" + post + "\n" + draft_bucketlist;
+    console.log("Prompt:", prompt)
+
+    try {
+        console.log("Sending post to GPT-3.5:", prompt)
+        const response = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0,
+            max_tokens: 1000,
+        });
+        console.log("Draft from GPT-3.5:", response.choices[0].message.content)
+        return { message: response.choices[0].message.content};
+    } catch (error) {
+        console.error("Error sending message to GPT-3.5:", error);
+        return { message: "Error processing your request. Please try again." + error };
+    }
+}
+
 function extractJSON(responseString) {
     try {
       // This regular expression assumes the JSON object starts with '{' and ends with '}'
@@ -97,18 +121,6 @@ const sendMessageToBackend = async (userMessage, conversationHistory, postText) 
         console.error("Error sending message to GPT-3.5:", error);
         return { message: "Error processing your request. Please try again." + error };
     }
-
-    // try {
-    //     print("123")
-    //     console.log("Sending message to GPT-3.5:", userMessage)
-    //     // Simulated delay to mimic API call
-    //     return new Promise(resolve => {
-    //         setTimeout(() => resolve({ message: `Echo: ${userMessage + "!"}` }), 500);
-    //     });
-    // } catch (error) {
-    //     console.error("Error sending message to backend:", error);
-    //     return { message: "Error processing your request. Please try again." };
-    // }
 };
 
 export const useChat = () => {

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useChat } from './useChat';
-import { fetchPostSummary, fetchPostHighlight } from './useChat';
+import { fetchPostSummary, fetchPostHighlight, fetchDraft } from './useChat';
 import { getData } from './getData';
 import { useData } from './useData';
+import { printLine } from '../Content/modules/print';
 
 // const dummyPostText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam";
 // import highlight_sample from './highlight_sample.json'
@@ -23,7 +24,7 @@ const baseButtonStyle = {
 const styles = {
   conversationUI: {
     padding: '10px',
-    height: '400px',
+    height: '500px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -228,6 +229,16 @@ const styles = {
     backgroundColor: '#ff4d4d', // Red color for the remove button
     color: 'white',
   },
+  generateButton: {
+    ...baseButtonStyle, // Inherit all styles from summaryButton
+    backgroundColor: '#32CD32', // Red color for the remove button
+    color: 'white',
+  },
+  pasteButton: {
+    ...baseButtonStyle, // Inherit all styles from summaryButton
+    backgroundColor: '#FF8C00', // Red color for the remove button
+    color: 'white',
+  },
   // highlightToggleSwitchContainer: {
   //   position: 'absolute',
   //   top: '10px',
@@ -362,7 +373,7 @@ const ConversationUI = () => {
         // Send the individual span to the content script
         chrome.tabs.sendMessage(tabs[0].id, { action: 'removehighlight' }, function (response) {
           console.log(response);
-          console.log("remove highlight")
+          console.log("ConversationUI.jsx: remove highlight")
         });
       });
     }
@@ -441,7 +452,42 @@ const ConversationUI = () => {
 
     setTimeout(() => {
         setNotification({ message: '', type: 'success', visible: false });
-    }, 3000); // Message will disappear after 3000 milliseconds (3 seconds)
+    }, 1000); // Message will disappear after 3000 milliseconds (3 seconds)
+  };
+
+  const generateDraft = () => {
+    console.log(postData);
+    console.log(discussionPoints);
+    // fetchDraft(postData, discussionPoints).then(response => {
+    //       console.log(response);
+    // });
+
+    let instruction = "Below is a list of message history called 'Draft Bucket List'. Your goal is to utilize these information in draft bucket list to draft the full response to the Redit post. Please give the draft full response to the post. Return the response text only."
+    
+    let draft_bucketlist = "Draft bucket list:" + discussionPoints;
+    let prompt = instruction + "\n" + draft_bucketlist;
+    console.log("Prompt:", prompt)
+
+    sendMessage("Generate Draft", prompt, postData);
+    showNotification('Draft generated successfully!'); 
+  };
+
+
+
+  const pasteDraft = () => {
+    // Get the last message from the chat
+    // const latestMessage = messages[messages.length - 1].text;
+    const latestMessage = "Hello world";
+    printLine("Hello");
+    console.log("lastest message:", latestMessage);
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      console.log("ID:", tabs[0].id);
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'highlight', text: latestMessage}, function (response) {
+        console.log(response);
+      });
+    });
+
+    showNotification('Draft pasted successfully!'); 
   };
 
 
@@ -535,6 +581,12 @@ const ConversationUI = () => {
       
       {mode === 'drafting' && (
         <div style={styles.contentContainer}>
+          <button onClick={() => generateDraft()}
+                        style={styles.generateButton}>Generate</button>
+          <button onClick={() => pasteDraft()}
+                        style={styles.pasteButton}>Paste</button>
+           {/* <button onClick={() = pasteDraft()} */}
+                        {/* style={styles.pasteButton}>Use</button> */}
           <h3>Discussion Draft</h3>
           <ul>
             {discussionPoints.map((point, index) => (
@@ -573,6 +625,7 @@ const ConversationUI = () => {
           </div>
         ))}
       </div>
+
       <form onSubmit={handleSendMessage} style={styles.inputArea}>
         <input
           type="text"
