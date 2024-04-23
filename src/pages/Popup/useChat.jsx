@@ -118,28 +118,6 @@ export const useChat = () => {
             setMessages(currentMessages => [...currentMessages, { sender: 'bot', text: backendResponse.message, selectable: true  }]);
         }
     };
-
-    export const useChat = () => {
-        const [messages, setMessages] = useState([]);
-
-        const sendMessage = async (userMessage) => {
-            setMessages(currentMessages => [...currentMessages, { sender: 'user', text: userMessage }]);
-            
-            console.log("userMessage:", userMessage)
-            if (userMessage === "Generate draft") {
-                console.log("Generating draft...")
-                const backendResponse = await generateDraft(userMessage);
-                if (backendResponse && backendResponse.message) {
-                    setMessages(currentMessages => [...currentMessages, { sender: 'bot', text: backendResponse.message }]);
-                }
-            }
-            else{
-                const backendResponse = await sendMessageToBackend(userMessage);
-                if (backendResponse && backendResponse.message) {
-                    setMessages(currentMessages => [...currentMessages, { sender: 'bot', text: backendResponse.message }]);
-                }
-            }
-        };
-
+    
         return { messages, sendMessage };
     };
