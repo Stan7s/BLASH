@@ -12,7 +12,8 @@
   },
   "permissions": [
     "scripting",
-    "activeTab"
+    "activeTab",
+    "clipboardWrite"
   ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"

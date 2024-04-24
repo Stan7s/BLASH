@@ -49,16 +49,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   // Lingbo: Paste Draft
   if (message.action === "pasteDraft") {
-    console.log("Paste Draft:", message.text);
+    console.log("Pasting Draft:", message.text);
+    printLine("pasteDfrat listener");
     const commentButton = document.querySelector('button[data-testid="trigger-button"]');
+    console.log("commentButton");
     if (commentButton) {
       console.log("Found comment button");
       commentButton.click();
+      console.log("Clicked comment button");
     }
     else{
       console.log("No comment button found");
     }
-    sendResponse({ status: 'paste success' });
+    sendResponse({ status: commentButton });
     return true;
   }
 });

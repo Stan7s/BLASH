@@ -16,7 +16,7 @@ const baseButtonStyle = {
   padding: '5px 10px',
   borderRadius: '5px',
   border: 'none',
-  backgroundColor: '#007bff',
+  backgroundColor: '#00CED1',
   color: 'white',
   cursor: 'pointer',
 };
@@ -24,7 +24,7 @@ const baseButtonStyle = {
 const styles = {
   conversationUI: {
     padding: '10px',
-    height: '500px',
+    height: '580px',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -51,7 +51,7 @@ const styles = {
   },
   userMessage: {
     alignSelf: 'flex-end',
-    backgroundColor: '#dcf8c6',
+    backgroundColor: 'rgba(0, 206, 209, 0.25)',
     marginRight: '10px', // Space from the right edge
   },
   botMessage: {
@@ -74,12 +74,13 @@ const styles = {
     padding: '10px 20px',
     borderRadius: '20px',
     border: 'none',
-    backgroundColor: '#007bff',
+    backgroundColor: '#00CED1',
     color: 'white',
     cursor: 'pointer',
   },
   summaryButton: {
-    ...baseButtonStyle
+    ...baseButtonStyle,
+    backgroundColor: '#00CED1',
   },
   summaryText: {
     borderRadius: '5px',
@@ -141,14 +142,15 @@ const styles = {
   themeButtonContainer: {
     display: 'flex',
     flexWrap: 'wrap', // Allows items to wrap as needed
-    padding: '2px', // Padding inside the container
+    padding: '1px', // Padding inside the container
     gap: '10px', // Space between buttons
   },
   themeButton: {
+    fontSize: '10px', 
     flexGrow: 1,
     flexBasis: 'calc(50% - 5px)', // Calculate width to fit two items per row considering the gap
     height: 'auto', // Height based on content
-    padding: '5px 10px', // Sufficient padding to handle text wrapping
+    padding: '5px 5px', // Sufficient padding to handle text wrapping
     boxSizing: 'border-box', // Include padding and border in the element's total width and height
     overflow: 'hidden', // Hide overflowed content
     display: 'flex',
@@ -166,9 +168,9 @@ const styles = {
     boxShadow: '0 5px 15px rgba(0,0,0,0.2)', // Add shadow for depth
   },
   discussionDraftContainer: {
-    maxHeight: '150px', // Set a maximum height that fits within your UI design
+    maxHeight: '300px', // Set a maximum height that fits within your UI design
     overflowY: 'auto', // Enable vertical scrolling
-    padding: '10px',
+    padding: '5px',
     backgroundColor: '#f8f8f8', // Optional: for better visibility
     borderRadius: '8px', // Optional: for aesthetics
     margin: '10px', // Optional: for spacing around the container
@@ -196,22 +198,22 @@ const styles = {
     textAlign: 'center',
   },
   notificationSuccess: {
-      backgroundColor: '#4CAF50', // Green for success
+      backgroundColor: '#9ACD32', // Green for success
   },
   notificationWarning: {
-      backgroundColor: '#ff9800', // Orange for warning
+      backgroundColor: '#F4A460', // Orange for warning
   },
   menuButton: {
-    fontSize: '14px', // Larger font size
+    fontSize: '12px', // Larger font size
     padding: '8px 16px',
-    borderRadius: '5px',
+    borderRadius: '10px',
     border: '1px solid #ccc',
     backgroundColor: '#f0f0f0',
     cursor: 'pointer',
     transition: 'background-color 0.3s',
   },
   menuButtonActive: {
-    backgroundColor: '#007bff', // Blue background for active mode
+    backgroundColor: '#00CED1', // Blue background for active mode
     color: 'white',
   },
   menuContainer: {
@@ -222,21 +224,23 @@ const styles = {
   },  
   noButton: {
     ...baseButtonStyle, // Inherit styles from summaryButton
-    backgroundColor: '#ff4d4d', // Light red
+    backgroundColor: '#FA8072', // Light red
   },
   removeButton: {
     ...baseButtonStyle, // Inherit all styles from summaryButton
-    backgroundColor: '#ff4d4d', // Red color for the remove button
+    backgroundColor: '#FA8072', // Red color for the remove button
     color: 'white',
   },
   generateButton: {
     ...baseButtonStyle, // Inherit all styles from summaryButton
-    backgroundColor: '#32CD32', // Red color for the remove button
+    fontSize: '12px', // Smaller font size
+    backgroundColor: '#00CED1', // Red color for the remove button
     color: 'white',
   },
   pasteButton: {
     ...baseButtonStyle, // Inherit all styles from summaryButton
-    backgroundColor: '#FF8C00', // Red color for the remove button
+    fontSize: '12px', // Smaller font size
+    backgroundColor: '#9ACD32', // Red color for the remove button
     color: 'white',
   },
   // highlightToggleSwitchContainer: {
@@ -246,7 +250,7 @@ const styles = {
   //   zIndex: 10, // Ensure it is above other content if necessary
   // },
   contentContainer: {
-    maxHeight: '0 0 40%',
+    maxHeight: '0 0 50%',
     overflowY: 'auto', 
     backgroundColor: '#f0f0f0', 
     padding: '2px 2px 2px 2px', // Ensure padding is sufficient on all sides
@@ -271,6 +275,9 @@ const styles = {
       display: 'flex', // Use flex to center the toggle switch within this container
       justifyContent: 'flex-end', // Align the toggle switch to the right
   },
+  no_indent: {
+    marginLeft: '0px',
+  },
 };
 
 const ConversationUI = () => {
@@ -278,7 +285,7 @@ const ConversationUI = () => {
   const [inputText, setInputText] = useState('');
 
   const { postData, textData } = useData();
-  const [summary, setSummary] = useState('Loading Summary!');
+  const [summary, setSummary] = useState('Loading Summary...');
   const [highlight_sample, sethighlight_sample] = useState({});
 
   const [isHighlighted, setIsHighlighted] = useState(false);
@@ -437,7 +444,7 @@ const ConversationUI = () => {
             return currentPoints; // Return current list without adding duplicate
         } else {
             // Add new discussion point if not already in the list
-            showNotification('Discussion point is successfully added'); // Show success message
+            showNotification('Point added!'); // Show success message
             return [...currentPoints, message];
         }
     });
@@ -445,7 +452,7 @@ const ConversationUI = () => {
 
   const removeDiscussionPoint = (indexToRemove) => {
     setDiscussionPoints(currentPoints => currentPoints.filter((_, index) => index !== indexToRemove));
-    showNotification('Discussion point successfully removed'); 
+    showNotification('Point removed.'); 
   };
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type, visible: true });
@@ -476,18 +483,22 @@ const ConversationUI = () => {
 
   const pasteDraft = () => {
     // Get the last message from the chat
-    // const latestMessage = messages[messages.length - 1].text;
-    const latestMessage = "Hello world";
-    printLine("Hello");
-    console.log("lastest message:", latestMessage);
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      console.log("ID:", tabs[0].id);
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'highlight', text: latestMessage}, function (response) {
-        console.log(response);
-      });
+    const latestMessage = messages[messages.length - 1].text;
+    // const latestMessage = "Hello worldd";
+    console.log("latest message:", latestMessage);
+    // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    //   console.log("ID:", tabs[0].id);
+    //   chrome.tabs.sendMessage(tabs[0].id, { action: 'pasteDraft', text: latestMessage}, function (response) {
+    //     console.log(response);
+    //   });
+    // });
+    navigator.clipboard.writeText(latestMessage).then(function() {
+        console.log('Text successfully copied to clipboard');
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
     });
 
-    showNotification('Draft pasted successfully!'); 
+    showNotification('Draft copied successfully! Now click on the comment box and paste the draft.'); 
   };
 
 
@@ -527,11 +538,11 @@ const ConversationUI = () => {
       {/* Conditional rendering based on selected mode */}
       {mode === 'summary' && (
         <div style={styles.contentContainer}>
-          <b>Summary of the post:</b> {summary}
+          <b>Post summary:</b> {summary}
           <br></br>
-          Do you think the summary is correct?
+          {/* Do you think the summary is correct?
           <button style={styles.summaryButton}>Yes</button>
-          <button style={styles.noButton}>No</button>
+          <button style={styles.noButton}>No</button> */}
         </div>
       )}
 
@@ -582,15 +593,15 @@ const ConversationUI = () => {
       {mode === 'drafting' && (
         <div style={styles.contentContainer}>
           <button onClick={() => generateDraft()}
-                        style={styles.generateButton}>Generate</button>
+                        style={styles.generateButton}>Generate draft</button>
           <button onClick={() => pasteDraft()}
-                        style={styles.pasteButton}>Paste</button>
+                        style={styles.pasteButton}>Copy draft</button>
            {/* <button onClick={() = pasteDraft()} */}
                         {/* style={styles.pasteButton}>Use</button> */}
-          <h3>Discussion Draft</h3>
+          <h3>Discussion History</h3>
           <ul>
             {discussionPoints.map((point, index) => (
-              <li key={index}>
+              <li class="no_indent" key={index}>
                 {point}
                 <button onClick={() => removeDiscussionPoint(index)} 
                         style={styles.removeButton} 
@@ -619,7 +630,7 @@ const ConversationUI = () => {
             {msg.text}
             {msg.selectable && (
                 <button onClick={() => addDiscussionPoint(msg.text)} style={styles.summaryButton}>
-                    Add to Discussion
+                    Good point
                 </button>
             )}
           </div>
