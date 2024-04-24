@@ -15,7 +15,7 @@ export const fetchPostSummary = async (postText) => {
     try {
         console.log("Sending post to GPT-3.5:", prompt)
         const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4-turbo",
             messages: [{ role: "user", content: prompt }],
             temperature: 0,
             max_tokens: 1000,
@@ -52,11 +52,9 @@ function extractJSON(responseString) {
   
 
 export const fetchPostHighlight = async (postText) => {
-    let prompt = `Read the following post and extract spants from the post  
-    by topics. Generate a list of topics {topic_1, topic_2, ...} 
-    and group spans by those relevant topics. 
-    Desired json output format should be: 
-    {"topic": ["span1.1", "span1.2", …], "topic": ["span2.1", "span2.2", …], …} \n` + postText;
+    let prompt = `Given the following post, find a list of main topics from the post and identify exact spans from the post by those relevant topics. 
+    Desired json output format should have key as the specific topic and value is a list of relevant spans to that topic: 
+    {"topic": ["span 1.1", "span 1.2", …], "topic": ["span 2.1", "span 2.2", …], …} \n` + postText;
     
     try {
         console.log("Getting Highlights:", prompt)
@@ -67,6 +65,28 @@ export const fetchPostHighlight = async (postText) => {
             max_tokens: 1000,
         });
         console.log("Highlights GPT-3.5:", response.choices[0].message.content)
+        return extractJSON(response.choices[0].message.content);
+    } catch (error) {
+        console.error("Error sending message to GPT-3.5:", error);
+        return { message: "Error processing your request. Please try again." + error };
+    }
+}
+
+export const fetchCommentsHighlight = async (commentText) => {
+    let prompt = `Below are the top 10 comments for the post. Summarize the comments into topics and 
+    provide details regarding how each topic is covered by the comments. 
+    Return a json objective where the key is the topic and the value is the detail how the topic is covered by the comments:
+    {"Topic 1": "Details 1", "Topic 2": "Details 2", …}. Each detail should not be more than 40 words\n` + commentText;
+    
+    try {
+        console.log("Getting Comments Topics:", prompt)
+        const response = await openai.chat.completions.create({
+            model: "gpt-4-turbo",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0,
+            max_tokens: 1000,
+        });
+        console.log("Comments Highlights by GPT:", response.choices[0].message.content)
         return extractJSON(response.choices[0].message.content);
     } catch (error) {
         console.error("Error sending message to GPT-3.5:", error);

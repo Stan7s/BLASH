@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useChat } from './useChat';
+import { fetchCommentsHighlight, useChat } from './useChat';
 import { fetchPostSummary, fetchPostHighlight } from './useChat';
 import { getData } from './getData';
 import { useData } from './useData';
@@ -260,7 +260,58 @@ const styles = {
       display: 'flex', // Use flex to center the toggle switch within this container
       justifyContent: 'flex-end', // Align the toggle switch to the right
   },
+  collapsibleHeader: {
+    padding: '10px',
+    backgroundColor: '#e7e7e7',
+    cursor: 'pointer',
+    marginTop: '10px',
+    borderRadius: '5px',
+    border: '1px solid #ccc',
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  collapsibleContent: {
+      padding: '10px',
+      backgroundColor: '#f9f9f9',
+      borderRadius: '5px',
+      border: '1px solid #ddd',
+      marginTop: '5px',
+  },
+  // // Additional styles for nested collapsibles
+  // nestedCollapsibleHeader: {
+  //   ...styles.collapsibleHeader, // Inherit existing styles
+  //   marginLeft: '20px', // Adjust as necessary for desired indentation
+  //   backgroundColor: '#f0f0f0', // Optional: different background to distinguish levels
+  //   borderColor: '#bbb', // Optional: lighter border for nested items
+  // },
+
+  // nestedCollapsibleContent: {
+  //   ...styles.collapsibleContent, // Inherit existing styles
+  //   marginLeft: '20px', // Maintain consistent alignment with header
+  //   backgroundColor: '#fafafa', // Slightly different background for nested content
+  // },
 };
+
+// Extend or modify styles that need to refer to other styles
+styles.nestedCollapsibleHeader = {
+  ...styles.collapsibleHeader,
+  marginLeft: '20px',
+  backgroundColor: '#f0f0f0',
+  borderColor: '#bbb',
+};
+
+styles.nestedCollapsibleContent = {
+  ...styles.collapsibleContent,
+  marginLeft: '20px',
+  backgroundColor: '#fafafa',
+};
+
+styles.perspectiveButton = {
+  ...styles.collapsibleHeader, // Inherit existing styles
+  backgroundColor: '#007bff', // Set the background color to blue
+  color: 'white', // Ensure the text color is white for better visibility
+  cursor: 'pointer', // Cursor should indicate it's clickable
+}
 
 const ConversationUI = () => {
   const { messages, sendMessage } = useChat();
@@ -269,6 +320,7 @@ const ConversationUI = () => {
   const { postData, textData } = useData();
   const [summary, setSummary] = useState('Loading Summary!');
   const [highlight_sample, sethighlight_sample] = useState({});
+  const [comments_highlight, setCommentsHighlight] = useState({});
 
   const [isHighlighted, setIsHighlighted] = useState(false);
   const [mode, setMode] = useState('summary'); // Track display mode
@@ -277,6 +329,34 @@ const ConversationUI = () => {
 
   const [discussionPoints, setDiscussionPoints] = useState([]);
   const [notification, setNotification] = useState({ message: '', visible: false, type: 'success' });
+
+  const [showCollapsible, setShowCollapsible] = useState(false);
+  const [topics, setTopics] = useState({
+    "Topic 1": "Comments are talking about this",
+    "Topic 2": "Comments are talking about topic 2",
+    "Topic 3": "Comments are talking about topic 3",
+    "Topic 4": "Comments are talking about topic 4"
+  });
+  const Collapsible = ({ title, content, isNested = false }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const toggle = () => setIsOpen(!isOpen);
+
+    const headerStyle = isNested ? styles.nestedCollapsibleHeader : styles.collapsibleHeader;
+    const contentStyle = isNested ? styles.nestedCollapsibleContent : styles.collapsibleContent;
+
+    return (
+        <div>
+            <div onClick={toggle} style={headerStyle}>
+                {title} {isOpen ? '(-)' : '(+)'}
+            </div>
+            {isOpen && (
+                <div style={contentStyle}>
+                    {content}
+                </div>
+            )}
+        </div>
+    );
+  };
 
 
 
@@ -297,6 +377,17 @@ const ConversationUI = () => {
       });
     }
   }, [postData]); // Dependency on postData to fetch summary
+  useEffect(() => {
+    if (textData) {
+      console.log("commentsData", textData);
+      fetchCommentsHighlight(textData).then(commentsJson => {
+        setCommentsHighlight(commentsJson);
+        console.log("Comments Topics Updated:", commentsJson);
+      }).catch(error => {
+        console.error("Failed to fetch comments highlights", error);
+      });
+    }
+  }, [textData]); // Dependency on postData to fetch summary
   
   const toggleSwitchLabelStyle = {
     position: 'absolute',
@@ -417,6 +508,26 @@ const ConversationUI = () => {
       setActiveButton(null); // Reset the active button state after the animation
     }, 200); // Match this with the CSS transition duration
   };
+  const handlePerspectiveButtonClick = (existingTopics) => {
+
+    if (existingTopics && Object.keys(existingTopics).length > 1) {
+      const keysToString = (data) => {
+        return Object.keys(data).join(", "); // This will create a string separated by commas
+      };
+    
+      console.log(keysToString(existingTopics))
+      const displayMessage = "Give me some new perspectives";
+      
+      const backendMessage = `Existing comment are talking about these topics: ${keysToString(existingTopics)} \n
+      Briefly suggest new topics for me to include in my response to the OP that have not been addressed by existing comments.` 
+      // Use one sentence for each topic. Format the outputs into - <New Topic 1> <br> - <New Topic 2> <br> ... `
+  
+      sendMessage(displayMessage, backendMessage, postData); // Send the theme as a message
+    } else {
+        console.log("Not enough data.");
+    }
+
+  };
 
   const addDiscussionPoint = (message) => {
     setDiscussionPoints(currentPoints => {
@@ -443,6 +554,11 @@ const ConversationUI = () => {
         setNotification({ message: '', type: 'success', visible: false });
     }, 3000); // Message will disappear after 3000 milliseconds (3 seconds)
   };
+
+  const toggleCollapsible = () => {
+    setShowCollapsible(!showCollapsible);
+  };
+
 
 
 
@@ -480,14 +596,33 @@ const ConversationUI = () => {
 
       {/* Conditional rendering based on selected mode */}
       {mode === 'summary' && (
-        <div style={styles.contentContainer}>
-          <b>Summary of the post:</b> {summary}
-          <br></br>
-          Do you think the summary is correct?
-          <button style={styles.summaryButton}>Yes</button>
-          <button style={styles.noButton}>No</button>
-        </div>
+          <div style={styles.contentContainer}>
+              <b>Summary of the post:</b> {summary}
+              <br />
+              Do you think the summary is correct?
+              <button style={styles.summaryButton}>Yes</button>
+              <button style={styles.noButton}>No</button>
+
+              {/* Main collapsible box for discussions */}
+              <div onClick={toggleCollapsible} style={styles.collapsibleHeader}>
+                  What other people have talked about {showCollapsible ? '(-)' : '(+)'}
+              </div>
+              {showCollapsible && (
+                  <div>
+                      {Object.entries(comments_highlight).map(([topic, description]) => (
+                          <Collapsible key={topic} title={topic} content={description} isNested={true} />
+                      ))}
+                  </div>
+              )}
+
+              {/* Button to request new perspectives */}
+              <div style={styles.perspectiveButton} onClick={() => handlePerspectiveButtonClick(comments_highlight)}>
+                  Give me some new perspectives
+              </div>
+          </div>
       )}
+
+
 
       {mode === 'highlight' && (
           <div style={styles.contentContainer}>
