@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useChat } from './useChat';
-import { fetchPostSummary, fetchPostHighlight, fetchDraft } from './useChat';
+import { fetchPostSummary, fetchPostHighlight,fetchCommentsHighlight, fetchDraft } from './useChat';
 import { getData } from './getData';
 import { useData } from './useData';
 import { printLine } from '../Content/modules/print';
@@ -146,7 +146,7 @@ const styles = {
     gap: '10px', // Space between buttons
   },
   themeButton: {
-    fontSize: '10px', 
+    fontSize: '11px', 
     flexGrow: 1,
     flexBasis: 'calc(50% - 5px)', // Calculate width to fit two items per row considering the gap
     height: 'auto', // Height based on content
@@ -181,10 +181,10 @@ const styles = {
     flex: '1 0 40%',
     overflowY: 'auto',  // Enable scrolling
     backgroundColor: '#f0f0f0',  // Light grey background
-    padding: '10px',  // Padding around the content
+    padding: '15px 15px',  // Padding around the content
     borderRadius: '8px',  // Rounded corners
     boxShadow: '0 2px 10px rgba(0,0,0,0.1)',  // Subtle shadow for depth
-    margin: '10px 0',  // Vertical spacing
+    margin: '10px 10px',  // Vertical spacing
   },
   notification: {
     position: 'fixed',
@@ -196,6 +196,8 @@ const styles = {
     zIndex: 1000, // Make sure it's on top of other elements
     color: 'white',
     textAlign: 'center',
+    // make it at the center of the screen
+    left: '5%',
   },
   notificationSuccess: {
       backgroundColor: '#9ACD32', // Green for success
@@ -255,7 +257,7 @@ const styles = {
     backgroundColor: '#f0f0f0', 
     padding: '2px 2px 2px 2px', // Ensure padding is sufficient on all sides
     borderRadius: '8px', 
-    boxShadow: '0 2px 10px rgba(0,0,0,0.1)', 
+    boxShadow: '0 10px 10px rgba(0,0,0,0.1)', 
     margin: '10px 0', 
     position: 'relative', // Required for absolute positioning of children
   },
@@ -326,7 +328,7 @@ styles.nestedCollapsibleContent = {
 
 styles.perspectiveButton = {
   ...styles.collapsibleHeader, // Inherit existing styles
-  backgroundColor: '#007bff', // Set the background color to blue
+  backgroundColor: '#00CED1', // Set the background color to blue
   color: 'white', // Ensure the text color is white for better visibility
   cursor: 'pointer', // Cursor should indicate it's clickable
 }
@@ -656,9 +658,9 @@ const ConversationUI = () => {
           <div style={styles.contentContainer}>
               <b>Summary of the post:</b> {summary}
               <br />
-              Do you think the summary is correct?
+              {/* Do you think the summary is correct?
               <button style={styles.summaryButton}>Yes</button>
-              <button style={styles.noButton}>No</button>
+              <button style={styles.noButton}>No</button> */}
 
               {/* Main collapsible box for discussions */}
               <div onClick={toggleCollapsible} style={styles.collapsibleHeader}>

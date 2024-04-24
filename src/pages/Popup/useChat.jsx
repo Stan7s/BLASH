@@ -11,7 +11,7 @@ const openai = new OpenAI({
 });
 
 export const fetchPostSummary = async (postText) => {
-    let prompt = "Summarize the following text: " + postText;
+    let prompt = "You are an empathical AI assistant. Summarize the post with less than 60 words. Post:" + postText;
     try {
         console.log("Sending post to GPT-3.5:", prompt)
         const response = await openai.chat.completions.create({

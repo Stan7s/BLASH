@@ -38,48 +38,42 @@ export const useData = () => {
 
 
         const grabTextData = async () => {
-            try {
+          try {
               const tabs = await chrome.tabs.query({
-                active: true,
-                currentWindow: true,
+                  active: true,
+                  currentWindow: true,
               });
               const activeTab = tabs[0];
               const result = await chrome.scripting.executeScript({
-                target: { tabId: activeTab.id },
-                function: () => {
-                  let comments = ''; // Variable to store concatenated comments
+                  target: { tabId: activeTab.id },
+                  function: () => {
+                      let comments = '';
       
-                  // Iterate over the top 10 comments
-                  for (let i = 1; i <= 10; i++) {
-                    // Construct the XPath for each comment
-                    const xpath = `/html/body/shreddit-app/dsa-transparency-modal-provider/div/div[1]/div/main/div/faceplate-batch/shreddit-comment-tree/shreddit-comment[${i}]/div[3]`;
+                      // Find all comment elements
+                      const commentElements = document.querySelectorAll('shreddit-comment');
       
-                    // Find the paragraph element for the current comment
-                    const paragraphElement = document.evaluate(
-                      xpath,
-                      document,
-                      null,
-                      XPathResult.FIRST_ORDERED_NODE_TYPE,
-                      null
-                    ).singleNodeValue;
+                      // Iterate over each comment element
+                      commentElements.forEach((commentElement, index) => {
+                          // Find the paragraph element within the comment element
+                          const paragraphElement = commentElement.querySelector('.md');
       
-                    // If paragraphElement exists, append its text content to the comments string
-                    if (paragraphElement) {
-                      comments += "Comment " + i.toString() + ": " + paragraphElement.textContent.trim() + '\n';
-                    }
-                  }
+                          // If paragraphElement exists, append its text content to the comments string
+                          if (paragraphElement) {
+                              comments += `Comment ${index + 1}: ${paragraphElement.textContent.trim()}\n`;
+                          }
+                      });
       
-                  // Return the concatenated comments
-                  return comments.trim();
-                },
+                      // Return the concatenated comments
+                      return comments.trim();
+                  },
               });
               setTextData(result[0].result || 'No comments found for this post.');
-            //   console.log("Comments arre", result[0].result || 'No comments found for this post.')
-            } catch (error) {
+          } catch (error) {
               console.error('Error fetching comments data:', error);
-              setTextData('Error fetching comments data.'); // Set error message for textData
-            }
+              setTextData('Error fetching comments data.');
+          }
         };
+
 
         fetchData();
         grabTextData();
