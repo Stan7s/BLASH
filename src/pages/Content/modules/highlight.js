@@ -42,7 +42,7 @@ export const highlightText = (textToHighlight, colorToHighlight) => {
 };
 
 export const removeHighlights = () => {
-    console.log("remove highlight");
+    console.log("highlight.js: remove highlight");
     // Select all highlighted spans by class name
     const highlightedSpans = document.querySelectorAll('.highlight');
 

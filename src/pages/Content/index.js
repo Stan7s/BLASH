@@ -34,7 +34,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
   if (message.action === 'removehighlight') {
-    console.log("remove highlight")
+    // alert("remove highlight");
+    console.log("index.js: remove highlight");
     // Query all highlighted elements and remove them
     const highlightedSpans = document.querySelectorAll('.highlight');
     highlightedSpans.forEach(span => {
@@ -44,6 +45,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       parent.normalize(); // Normalize to merge text nodes
     });
     sendResponse({ status: 'All highlights removed' });
+    return true;
+  }
+  // Lingbo: Paste Draft
+  if (message.action === "pasteDraft") {
+    console.log("Pasting Draft:", message.text);
+    printLine("pasteDfrat listener");
+    const commentButton = document.querySelector('button[data-testid="trigger-button"]');
+    console.log("commentButton");
+    if (commentButton) {
+      console.log("Found comment button");
+      commentButton.click();
+      console.log("Clicked comment button");
+    }
+    else{
+      console.log("No comment button found");
+    }
+    sendResponse({ status: commentButton });
     return true;
   }
 });
