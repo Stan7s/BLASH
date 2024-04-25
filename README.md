@@ -26,16 +26,21 @@ To use this extension, follow these steps:
    npm install
    ```
 
-4. Modify the `secrets.api.js` file:
+4. Create the `secrets.api.js` file to store OpenAI API Key:
 
-   - Open the `secrets.api.js` file located in the root directory.
+   - Create the `secrets.api.js` file located in the root directory with content as follows
    - Replace the placeholder value of GPT_API_KEY with your own API key.
    - Save the changes.
+   ```
+   const GPT_API_KEY = "YOUR_API_KEY";
+   export { GPT_API_KEY };
+   ```
 
 5. Generate necessary files using OpenSSL `key.pem` and `cert.pem` and put them under the `utils` folder:
 
    ```bash
-   openssl genrsa -out private.pem
+   cd utils
+   openssl genrsa -out key.pem
    openssl req -new -x509 -key key.pem -out cert.pem -days 365
    ```
 
@@ -55,7 +60,12 @@ To use this extension, follow these steps:
 
    - Click on "Load unpacked".
    - Select the `build` folder from the repository.
-   - The extension should now be visible in the browser toolbar.
+   - The extension should now be visible in the browser toolbar under Extensions.
+  
+9. Use the extension:
+
+   - Navigate to a Reddit Post related to mental health. Example: [Other people have it worse isn't very comforting](https://www.reddit.com/r/mentalhealth/comments/1b8y5s5/other_people_have_it_worse_isnt_very_comforting/)
+   - Click on the extension to start interacting with the AI assistant!
 
 ## Usage
 
