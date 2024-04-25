@@ -32,11 +32,11 @@ To use this extension, follow these steps:
    - Replace the placeholder value of GPT_API_KEY with your own API key.
    - Save the changes.
 
-5. Generate necessary files using OpenSSL:
+5. Generate necessary files using OpenSSL `key.pem` and `cert.pem` and put them under the `utils` folder:
 
    ```bash
    openssl genrsa -out private.pem
-   openssl req -new -x509 -key private.pem -out public.pem -days
+   openssl req -new -x509 -key keys.pem -out cert.pem -days 365
    ```
 
 6. Start the development server:
