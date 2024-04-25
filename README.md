@@ -36,7 +36,7 @@ To use this extension, follow these steps:
 
    ```bash
    openssl genrsa -out private.pem
-   openssl req -new -x509 -key keys.pem -out cert.pem -days 365
+   openssl req -new -x509 -key key.pem -out cert.pem -days 365
    ```
 
 6. Start the development server:
